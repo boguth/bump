@@ -7,22 +7,18 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>7BDAFFCD-3B38-4A17-9586-6DCFDF6574DE</string>
 	<key>IDESourceControlProjectName</key>
-	<string>Bump</string>
+	<string>project</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>02A964FC00F395987CF181930EB9D795C5BB4D48</key>
 		<string>https://github.com/boguth/xcode-is-disagreeable.git</string>
-		<key>F88F99541AAFA7F06AA0F17E111DD732E6F7124D</key>
-		<string>https://github.com/pmacaluso3/BumpBoysXCode</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>Bump.xcodeproj</string>
+	<string>Bump.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>02A964FC00F395987CF181930EB9D795C5BB4D48</key>
 		<string>../..</string>
-		<key>F88F99541AAFA7F06AA0F17E111DD732E6F7124D</key>
-		<string>../../../Bump</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
 	<string>https://github.com/boguth/xcode-is-disagreeable.git</string>
@@ -32,14 +28,6 @@
 	<string>02A964FC00F395987CF181930EB9D795C5BB4D48</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
-		<dict>
-			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
-			<string>public.vcs.git</string>
-			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>F88F99541AAFA7F06AA0F17E111DD732E6F7124D</string>
-			<key>IDESourceControlWCCName</key>
-			<string>Bump</string>
-		</dict>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>

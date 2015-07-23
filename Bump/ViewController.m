@@ -21,8 +21,9 @@
 @property (strong, nonatomic) NSOperationQueue *bgQueue;
 @property (strong, nonatomic) NSMutableArray *imageData;
 @property (assign, nonatomic) CFErrorRef *error;
-@property (assign, nonatomic) BOOL *hasBeenChecked;
-@property (assign, nonatomic) BOOL *contactsHasBeenChecked;
+@property (assign, nonatomic) BOOL hasBeenChecked;
+@property (assign, nonatomic) BOOL contactsHasBeenChecked;
+@property (assign, nonatomic) NSString *firstTimeChecked;
 
 @end
 
@@ -36,16 +37,18 @@
 
 -(void)makeRequest:(NSString*)string
 {
-    NSLog(@"You are in the MakeRequest method");
+    NSLog(@"%@ %@", NSStringFromSelector(_cmd), string);
     NSString *location = string;
     NSString *prefix = @"https://whispering-stream-9304.herokuapp.com/update?lat=";
     NSString *queryString = [prefix stringByAppendingString:location];
     [self loadURLsFromLocation:queryString];
 }
 
+- (IBAction)dismissLoginScreen:(UIStoryboardSegue*)sender{
+    NSLog(@"bye bye");
+}
 
 - (void)viewDidAppear:(BOOL)animated{
-    NSLog(@"viewDidAppear1");
     [super viewDidAppear:animated];
     if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasLaunchedOnce"]){
         [self performSegueWithIdentifier:@"firstLogin" sender:self];
@@ -53,104 +56,124 @@
     else
     {
     
-    //     This conditional block of code is for push notifications
         if ([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)])
         {
-        // iOS 8 Notifications
-        // use registerUserNotificationSettings
-            NSLog(@"registerUserNotificationSettings");
             [[UIApplication sharedApplication] registerUserNotificationSettings:[UIUserNotificationSettings settingsForTypes:(UIUserNotificationTypeSound |         UIUserNotificationTypeAlert | UIUserNotificationTypeBadge) categories:nil]];
             [[UIApplication sharedApplication] registerForRemoteNotifications];
         }
         else
         {
-            // iOS < 8 Notifications
-            // use registerForRemoteNotifications
-            [[UIApplication sharedApplication] registerForRemoteNotificationTypes: UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert];
+            [[UIApplication sharedApplication] registerForRemoteNotifications];
         }
         
         if (self.hasBeenChecked != YES){
-            NSLog(@"address Book auth call");
              [self addressBookAuth];
         }
         
         if ([self.locationManager respondsToSelector:@selector(requestAlwaysAuthorization)]) {
             [self.locationManager requestAlwaysAuthorization];
         }
-        NSLog(@" You are in viewDidAppear2");
     }
+    self.firstTimeChecked = @"Yes";
     
 }
 - (void)viewDidLoad {
 
     [super viewDidLoad];
-    self.dataArray = @[];
-    self.nameArray = @[];
-    self.imageData = [[NSMutableArray alloc] init];
+    if(!self.users){
+        self.users = [[NSMutableArray alloc] initWithCapacity:10];
+    }
     
     self.locationManager = [[CLLocationManager alloc] init];
     self.locationManager.delegate = self;
-    NSLog(@"You are in viewDidLoad1");
     [self.locationManager startUpdatingLocation];
 
-    if (self.contactsHasBeenChecked == YES){
+    if (self.contactsHasBeenChecked){
         ABAddressBookRef addressBook = ABAddressBookCreateWithOptions(NULL, self.error);
-        [self performSelector:@selector(listPeopleInAddressBook:) withObject:(__bridge id)(addressBook) afterDelay:0.0];
-//        [self listPeopleInAddressBook:addressBook];
-        // Check for iOS 8. Without this guard the code will crash with "unknown selector" on iOS 7.
-        // This is the notification block of code specifically for location.
+        [self performSelector:@selector(listPeopleInAddressBook:) withObject:(__bridge id)(addressBook) afterDelay:3.0];
     }
-    NSLog(@"You are in viewDidLoad2");
 
  
 }
 
+- (void)updateUsers:(NSDictionary *)dict{
+    
+    NSLog(@"User diction %@", dict);
+    NSArray *urls = [dict valueForKey:@"images"];
+    [self.users removeAllObjects];
+
+    NSLog(@"URLS From Users Method %@", urls);
+    for (NSString *url in urls) {
+        User *user = [[User alloc] init];
+        user.imageUrl = url;
+//        user.name = @"Pete";
+        user.phone = @"8132634315";
+        [self.users addObject:user];
+        [self updateImageDataForUser:user];
+    }
+}
+
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 
-
-// THESE ARE THE COLLECTION VIEW DELEGATE METHODS///
-
-
 -(NSInteger) numberOfSectionsInCollectionView:(UICollectionView *)collectionView{
-    NSLog(@"You are in numberOfSectionsInCollectionView");
     return 1;
 }
 
 
 -(NSInteger) collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
-    NSLog(@"%lu", (unsigned long)self.dataArray.count);
-    
-    return self.dataArray.count;
+    return self.users.count;
 }
 
 -(UICollectionViewCell*) collectionView:(UICollectionView *)cv cellForItemAtIndexPath:(NSIndexPath *)indexPath{
-    NSLog(@"collectionView:cellForItemAtIndexPath");
 
-    Cell *aCell = [cv dequeueReusableCellWithReuseIdentifier:@"myCell" forIndexPath:indexPath];
-    UIImageView *imageView = (UIImageView *)[cv viewWithTag:1];
-    imageView.image = (UIImage *)[self.imageData objectAtIndex:indexPath.row];
-//    NSString *names = (NSString *)[self.nameArray objectAtIndex:indexPath.row];
-    
-    [imageView.layer setMasksToBounds:YES];
-    [imageView.layer setBorderColor:[UIColor whiteColor].CGColor];
-    [imageView.layer setBorderWidth:1];
-    [imageView.layer setCornerRadius:40];
-    
-    
-    
-    UILabel *title = [[UILabel alloc]initWithFrame:CGRectMake(23, 70, aCell.bounds.size.width, 40)];
-    title.tag = 200;
-    [aCell.contentView addSubview:title];
-    [title setFont:[UIFont fontWithName:@"AmericanTypewriter-Condensed" size:14.0]];
+    Cell *aCell = (Cell *)[cv dequeueReusableCellWithReuseIdentifier:@"myCell" forIndexPath:indexPath];
+    User *user = (User *)[self.users objectAtIndex:indexPath.row];
 
-//    [title setText:names];
+//    aCell.layer.borderWidth = 1;
+//    aCell.layer.borderColor = [UIColor redColor].CGColor;
+    
+    aCell.label.text = user.name;
+    NSLog(@"Username %@", user.name);
+    if (user.image) {
+        aCell.image.image = user.image;
+        [aCell.image.layer setMasksToBounds:YES];
+        [aCell.image.layer setBorderColor:[UIColor whiteColor].CGColor];
+        [aCell.image.layer setBorderWidth:1];
+        [aCell.image.layer setCornerRadius:35.5];
+        [aCell.spinner stopAnimating];
+        aCell.image.hidden = NO;
+    } else {
+        aCell.image.hidden = YES;
+//        [aCell.spinner startAnimating];
+        aCell.image.image = user.image;
+    }
     
     return aCell;
     
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
+    User *selectedUser = (User *)[self.users objectAtIndex:indexPath.row];
+    NSLog(@"You selected: %@", selectedUser);
+    
+    [self promptUserToCall:selectedUser.phone];
+    
+    
+}
+
+- (void)promptUserToCall:(NSString *)phoneNumber{
+    
+    NSURL *phoneUrl = [NSURL URLWithString:[NSString  stringWithFormat:@"telprompt:%@",phoneNumber]];
+    
+    if ( phoneNumber != nil && [[UIApplication sharedApplication] canOpenURL:phoneUrl]) {
+        [[UIApplication sharedApplication] openURL:phoneUrl];
+    } else
+    {
+        [[[UIAlertView alloc] initWithTitle:@"No Phone found" message:@"give them a call" delegate:nil cancelButtonTitle:@"Don't Call" otherButtonTitles:nil] show];
+    }
 }
 
 
@@ -159,7 +182,6 @@
 
 -(UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-    NSLog(@"You are in collectionView:viewForSupplementaryElementaryOfKind:atIndexPath");
     MySupplementaryViewCollectionReusableView *header = nil;
     if ([kind isEqual:UICollectionElementKindSectionHeader])
     {
@@ -181,8 +203,16 @@
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
 {
-    NSLog(@"You are in locationManager");
-    [NSThread sleepForTimeInterval:0.5f];
+    NSLog(@"FirstTime Checked %@", self.firstTimeChecked);
+    if (self.firstTimeChecked == @"Yes")
+    {
+        self.firstTimeChecked = @"No";
+    }
+    else
+    {
+        [NSThread sleepForTimeInterval:2.0f];
+    }
+    
     self.locationManager = [[CLLocationManager alloc] init];
     self.locationManager.delegate = self;
     self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
@@ -197,30 +227,32 @@
     
     
     
-    /// MOVEMENT TOLERANCE
-    //    if (prevLat == nil){
-    //        prevLat = &latitude;
-    //    }
-    //    else if (prevLat == &latitude){
-    //        [self.locationManager stopUpdatingLocation];
-    //    }
-    //    if (prevLat !=
-    //    NSLog(@"We're in the request maker.");
-    
+////    / MOVEMENT TOLERANCE
+//        if (prevLat == nil){
+//            prevLat = &latitude;
+//        }
+//        else if (prevLat == &latitude){
+//            [self.locationManager stopUpdatingLocation];
+//        }
+//        else if (prevLat != &latitude){
+//            [self.locationManager startUpdatingLocation];
+//        }
+//    
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     NSString *token = appDelegate.pushCode;
     
     //    NSLog(@"%f", latitude);
-  [self makeRequest:[NSString stringWithFormat:@"%f&lon=%f&token=%@",latitude,longitude,token]];
+    [self makeRequest:[NSString stringWithFormat:@"%f&lon=%f&token=%@",latitude,longitude,token]];
 //    [self makeRequest:[NSString stringWithFormat:@"%f&lon=%f&token=%@",latitude,longitude]];
 }
 
 - (void)loadURLsFromLocation:(NSString *)locationString {
-    NSLog(@"Yuo are in loadUrlsFromLoc");
     if(!self.bgQueue){
         self.bgQueue = [[NSOperationQueue alloc] init]; // Background threads it (backgroundqueue).
     }
     
+    [NSThread sleepForTimeInterval:2.0f];
+
     [NSURLConnection sendAsynchronousRequest:
      [NSURLRequest requestWithURL:
       [NSURL URLWithString:locationString]]
@@ -233,48 +265,30 @@
                                if(data != nil){
                                    
                                    NSDictionary *imagesDict = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-                                   NSLog(@"here is the hash from pete%@", imagesDict);
-//                                   NSDictionary *peteData = [imagesDict valueForKey:@"data"];
-                                   NSArray *urls = [imagesDict valueForKey:@"images"];
-//                                   NSArray *names = [peteData valueForKey:@"names"];
-//                                   NSLog(@"Your names%@", names);
-                                   NSLog(@"your urls%@", urls);
-//                                   self.nameArray = names;
-                                   self.dataArray = urls;
-                                   [self updateImageData];
+                                   [self updateUsers:imagesDict];
                                }
                                
                            }];
 }
 
-- (void)updateImageData{
-    NSLog(@"You are in updateImageData");
-
-    __block NSInteger count = self.dataArray.count;
+- (void)updateImageDataForUser:(User *)user{
     
-    for (NSInteger i = 0; i< self.dataArray.count; i++) {
-        if(!self.bgQueue){
-            self.bgQueue = [[NSOperationQueue alloc] init];
-        }
-        
-        [NSURLConnection sendAsynchronousRequest:
-         [NSURLRequest requestWithURL:
-          [NSURL URLWithString:self.dataArray[i]]]
-                                           queue:self.bgQueue
-                               completionHandler: ^(NSURLResponse *response, NSData *data, NSError *connectionError) {
-                                   if(data){
-                                       self.imageData[i] = [UIImage imageWithData:data];
-                                   }
-                                   
-                                   count -= 1;
-                                   if(count <= 0){
-                                       [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-                            
-                                           [self.collectionView reloadData];
-                                       }];
-                                   }
-                               }];
-    }
+    if(user.image){ return; }
+    
+    [NSURLConnection sendAsynchronousRequest:
+     [NSURLRequest requestWithURL:
+      [NSURL URLWithString:user.imageUrl]]
+                                       queue:self.bgQueue
+                           completionHandler: ^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+                               if(data && !connectionError){
+                                   user.image = [UIImage imageWithData:data];
+                                   [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                                       [self.collectionView reloadData];
+                                   }];
+                               } else {
+                                   NSLog(@"%@ - %@", NSStringFromSelector(_cmd), connectionError);
+                               }
+                           }];
 }
 
 
@@ -283,7 +297,7 @@
 // Address Book Methods
 -(void)addressBookAuth
 {
-    NSLog(@"You are in addressBookAuth");
+//    NSLog(@"You are in addressBookAuth");
     self.hasBeenChecked = YES;
     ABAuthorizationStatus status = ABAddressBookGetAuthorizationStatus();
     
@@ -313,14 +327,10 @@
 
         
         if (granted) {
-            // if they gave you permission, then just carry on
-//            [self listPeopleInAddressBook:addressBook];
-             [self performSelector:@selector(listPeopleInAddressBook:) withObject:(__bridge id)(addressBook) afterDelay:0.0];
+            [self performSelector:@selector(listPeopleInAddressBook:) withObject:(__bridge id)(addressBook) afterDelay:3.0];
         } else {
-            // however, if they didn't give you permission, handle it gracefully, for example...
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                // BTW, this is not on the main thread, so dispatch UI updates back to the main queue
                 
                 [[[UIAlertView alloc] initWithTitle:nil message:@"This app requires access to your contacts to function properly. Please visit to the \"Privacy\" section in the iPhone Settings app." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
             });
@@ -335,12 +345,9 @@
 
 -(void)listPeopleInAddressBook:(ABAddressBookRef *) addressBook {
     
-    
+//    NSLog(@"made it to the adress book method send");
     NSArray *allPeople = CFBridgingRelease(ABAddressBookCopyArrayOfAllPeople(addressBook));
     NSInteger numberOfPeople = [allPeople count];
-    
-    //        NSLog(@"This is the number of people in my contacts");
-    //        NSLog(@"%ld", (long)numberOfPeople);
     
     NSMutableDictionary *contactDictionary = [[NSMutableDictionary alloc] init];
     
@@ -387,32 +394,22 @@
             
             //                NSLog(@"the token is%@", token);
             [thisPerson setObject:token forKey:@"user_token"];\
-            NSString *key = [NSString stringWithFormat:@"person%d", i];
-            NSLog(@"%@", key);
+            NSString *key = [NSString stringWithFormat:@"person%ld", (long)i];
             [contactDictionary setObject:thisPerson forKey:key];
         }
     }
     
-    // NSMutableDictionary *contactsToServer = [[NSMutableDictionary alloc] init];
-    //            NSDictionary *jsonDictionary = [[NSMutableDictionary alloc] init];
-    //[contactsToServer setObject:contactArray forKey:@"contacts"];
     
-    //            NSString *jsonString = [contactsToServer JSONRepresentation];
     NSError *err = nil;
     NSData *contactsToServer = [NSJSONSerialization dataWithJSONObject:contactDictionary options:0 error:&err];
     NSLog(@"ERROR - %@", err);
-    //            NSLog(@"%@", contactsToServer);
-    
-    
-    // NSLog(@"%@", thisPerson);
-    
+
     if(!self.bgQueue){
         self.bgQueue = [[NSOperationQueue alloc] init]; // Background threads it (backgroundqueue).
     }
     
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
     [request setURL:[NSURL URLWithString:@"https://whispering-stream-9304.herokuapp.com/contacts"]];
-    //            [request setURL:[NSURL URLWithString:@"localhost:3000/contacts"]];
     [request setHTTPMethod:@"POST"];
     [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
     [request setHTTPBody:contactsToServer];
@@ -429,27 +426,6 @@
     else {
         NSLog(@"Connection Failed");
     }
-    
-    //            [NSURLConnection sendAsynchronousRequest:request
-    //                                               queue:self.bgQueue
-    //                                   completionHandler: ^{ NSLog(@"Finished the request");}];
-    //             ^(NSURLResponse *response, NSData *data, NSError *connectionError) {
-    //                                       if(connectionError){
-    //                                           NSLog(@"%@", connectionError);
-    //                                       }
-    //
-    //                                       if(data != nil){
-    //
-    //                                           NSDictionary *imagesDict = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-    //                                           NSArray *urls = [imagesDict valueForKey:@"images"];
-    //                                           //                                   NSLog(@"%@", urls);
-    //                                           self.dataArray = urls;
-    //                                           [self updateImageData];
-    //                                       }
-    
-    
-    //                                   }];
-    
 }
 
 

@@ -1,4 +1,4 @@
-//
+ //
 //  LoginController.m
 //  Bump
 //
@@ -25,6 +25,7 @@
   
 }
 
+
 - (IBAction)loginClicked:(id)sender {
         NSInteger success = 0;
         @try {
@@ -42,7 +43,6 @@
                 
                 NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
                 NSLog(@"%@", postData);
-                NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[postData length]];
                 
                 NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
                 [request setURL:url];
@@ -97,7 +97,7 @@
         }
         if (success) {
             [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasLaunchedOnce"];
-            [self performSegueWithIdentifier:@"loginSuccess" sender:self];
+            [self performSegueWithIdentifier:@"unwindLoginScreenSegue" sender:self];
         }
     }
     
