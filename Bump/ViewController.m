@@ -45,6 +45,7 @@
 
 
 - (void)viewDidAppear:(BOOL)animated{
+    NSLog(@"viewDidAppear1");
     [super viewDidAppear:animated];
     if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasLaunchedOnce"]){
         [self performSegueWithIdentifier:@"firstLogin" sender:self];
@@ -57,6 +58,7 @@
         {
         // iOS 8 Notifications
         // use registerUserNotificationSettings
+            NSLog(@"registerUserNotificationSettings");
             [[UIApplication sharedApplication] registerUserNotificationSettings:[UIUserNotificationSettings settingsForTypes:(UIUserNotificationTypeSound |         UIUserNotificationTypeAlert | UIUserNotificationTypeBadge) categories:nil]];
             [[UIApplication sharedApplication] registerForRemoteNotifications];
         }
@@ -68,13 +70,14 @@
         }
         
         if (self.hasBeenChecked != YES){
+            NSLog(@"address Book auth call");
              [self addressBookAuth];
         }
         
         if ([self.locationManager respondsToSelector:@selector(requestAlwaysAuthorization)]) {
             [self.locationManager requestAlwaysAuthorization];
         }
-        NSLog(@" You are in viewDidAppear");
+        NSLog(@" You are in viewDidAppear2");
     }
     
 }
@@ -82,6 +85,7 @@
 
     [super viewDidLoad];
     self.dataArray = @[];
+    self.nameArray = @[];
     self.imageData = [[NSMutableArray alloc] init];
     
     self.locationManager = [[CLLocationManager alloc] init];
@@ -129,6 +133,7 @@
     Cell *aCell = [cv dequeueReusableCellWithReuseIdentifier:@"myCell" forIndexPath:indexPath];
     UIImageView *imageView = (UIImageView *)[cv viewWithTag:1];
     imageView.image = (UIImage *)[self.imageData objectAtIndex:indexPath.row];
+//    NSString *names = (NSString *)[self.nameArray objectAtIndex:indexPath.row];
     
     [imageView.layer setMasksToBounds:YES];
     [imageView.layer setBorderColor:[UIColor whiteColor].CGColor];
@@ -136,12 +141,13 @@
     [imageView.layer setCornerRadius:40];
     
     
+    
     UILabel *title = [[UILabel alloc]initWithFrame:CGRectMake(23, 70, aCell.bounds.size.width, 40)];
     title.tag = 200;
     [aCell.contentView addSubview:title];
     [title setFont:[UIFont fontWithName:@"AmericanTypewriter-Condensed" size:14.0]];
 
-    [title setText:@"Test"];
+//    [title setText:names];
     
     return aCell;
     
@@ -206,6 +212,7 @@
     
     //    NSLog(@"%f", latitude);
   [self makeRequest:[NSString stringWithFormat:@"%f&lon=%f&token=%@",latitude,longitude,token]];
+//    [self makeRequest:[NSString stringWithFormat:@"%f&lon=%f&token=%@",latitude,longitude]];
 }
 
 - (void)loadURLsFromLocation:(NSString *)locationString {
@@ -220,13 +227,19 @@
                                        queue:self.bgQueue
                            completionHandler: ^(NSURLResponse *response, NSData *data, NSError *connectionError) {
                                if(connectionError){
-                                   NSLog(@"%@", connectionError);
+                                   NSLog(@"there was a connection error%@", connectionError);
                                }
                                
                                if(data != nil){
                                    
                                    NSDictionary *imagesDict = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+                                   NSLog(@"here is the hash from pete%@", imagesDict);
+//                                   NSDictionary *peteData = [imagesDict valueForKey:@"data"];
                                    NSArray *urls = [imagesDict valueForKey:@"images"];
+//                                   NSArray *names = [peteData valueForKey:@"names"];
+//                                   NSLog(@"Your names%@", names);
+                                   NSLog(@"your urls%@", urls);
+//                                   self.nameArray = names;
                                    self.dataArray = urls;
                                    [self updateImageData];
                                }

@@ -374,6 +374,7 @@
 				INFOPLIST_FILE = Bump/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "0a22a1c0-b644-49d5-910d-87cc9701fafc";
 			};
 			name = Debug;
 		};
@@ -385,6 +386,7 @@
 				INFOPLIST_FILE = Bump/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "0a22a1c0-b644-49d5-910d-87cc9701fafc";
 			};
 			name = Release;
 		};
