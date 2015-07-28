@@ -17,6 +17,7 @@ The capstone project at Development Bootcamp that I alongside two other teammate
 - Rails 4.0.3
 - Postgres 9.3.2
 - Xcode 6.4
+- iOS 8
 
 ## Gems
 Houston: Apple Push Notification gem for Ruby.
