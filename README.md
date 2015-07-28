@@ -7,4 +7,7 @@ The capstone project at Development Bootcamp that I alongside two other teammate
 2. [Nisk Siefken](https://github.com/nsiefken), push notification master and group lead.
 3. [Bo Guthrie](https://github.com/boguth), Xcoder, Objective-C'er, and front end maker.
 
-*Note - This repo does not include the rails API we built as a part of this project. To see that, visit (the Bump server)[https://github.com/pmacaluso3/BumpBoysServer].
+*Note - This repo does not include the rails API we built as a part of this project. To see that, visit [the Bump server](https://github.com/pmacaluso3/BumpBoysServer).
+
+## Sample Screen Shots
+![Bump Homescreen](homescreen.png)
