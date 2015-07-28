@@ -10,4 +10,4 @@ The capstone project at Development Bootcamp that I alongside two other teammate
 *Note - This repo does not include the rails API we built as a part of this project. To see that, visit [the Bump server](https://github.com/pmacaluso3/BumpBoysServer).
 
 ## Sample Screen Shots
-![Bump Homescreen](homescreen.png)
+![Bump Homescreen](homescreen.PNG)
