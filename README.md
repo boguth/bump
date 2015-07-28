@@ -11,3 +11,21 @@ The capstone project at Development Bootcamp that I alongside two other teammate
 
 ## Sample Screen Shots
 ![Bump Homescreen](homescreen.PNG)
+![Bump Login](login.PNG)
+## System Requirements
+- Ruby 2.0.0
+- Rails 4.0.3
+- Postgres 9.3.2
+- Xcode 6.4
+
+## Gems
+Houston: Apple Push Notification gem for Ruby.
+  - Repo and docs: [https://github.com/nomad/houston](https://github.com/nomad/houston)
+
+Whenever: Background worker for rails. Allows tasks to be run at scheduled intervals.
+  - Repo and docs: [https://github.com/javan/whenever](https://github.com/javan/whenever)
+
+## User Stories
+
+## Schema
+
