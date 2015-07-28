@@ -26,6 +26,23 @@ Whenever: Background worker for rails. Allows tasks to be run at scheduled inter
   - Repo and docs: [https://github.com/javan/whenever](https://github.com/javan/whenever)
 
 ## User Stories
+### MVP
+- As a user, I want to be able to log in to the app.
+- As a user, I want to see on my screen pictures of all the friends who are in my contacts list and have bump and who are within a 1000ft radius of myself.
+- As a user, I want to recieve notifications whenever friends enter my geofence, and only when they enter my geofence.
+- As a user, I want my interface to be dynamically updated, loading user pictures whenever the amount of friends I have within a 1000ft radius changes.
+- As a user, I want the app the run in the background.
+- As a user, I want the app to collect my contacts.
+- As a user, I want the app to ask me permission to use my contacts, locations, and to send me push notifications.
+
+### Future Features
+- As a user, I want to be able to tap my friends' pictures and call them.
+- As a user, I want to be able to create an account.
+- As a user, I want to be able to logout.
+- As a user, I want to be able to add friends to chat channels on the fly.
+- As a user, I want to be able to set my preferred geofenced radius.
+- As a user, I want to be able to enter "incognito mode" so that I don't show up on others' screens and they don't show up on mine.
 
 ## Schema
+![Schema](schema.png)
 
